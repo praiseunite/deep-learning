@@ -1,0 +1,10 @@
+# Ignore all Solutions directories and files
+**/Solutions/
+*Solutions*
+
+# Ignore standard python/OS files
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+.idea/
