@@ -26,6 +26,13 @@ To succeed in this course, you will need the following:
   - `numpy`
   - `matplotlib`
 
+### Hardware & Cloud Platforms (Free GPU Access)
+You **do not** need an expensive computer or a dedicated graphics card (GPU) to start this course. The early sessions will run perfectly fine on a standard laptop CPU. However, as we progress to more complex models (like CNNs), a GPU will speed up training from *hours* to *minutes*.
+
+If you do not have a dedicated GPU, we highly recommend using these **100% free** cloud platforms that run directly in your browser:
+- 🌟 **[Google Colab](https://colab.research.google.com/):** The industry standard for beginners. It gives you a free Jupyter Notebook environment with TensorFlow pre-installed and allows you to connect to a free NVIDIA GPU.
+- 📊 **[Kaggle Notebooks](https://www.kaggle.com/code):** Similar to Colab, but deeply integrated with thousands of open-source datasets. Also provides free GPU access.
+
 *(Instructions for installing these libraries are covered in Session 1).*
 
 ---
