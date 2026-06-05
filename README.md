@@ -53,6 +53,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 08](./Session_08_Regularization/)** | **Regularization** | Combating Overfitting using L1/L2 penalties, Dropout layers, and Early Stopping Callbacks. |
 | **[Session 09](./Session_09_TensorFlow_and_Keras/)** | **TensorFlow and Keras** | Computational Graphs, Tensors, and the Keras Functional API. |
 | **[Session 10](./Session_10_Model_Deployment/)** | **Model Deployment** | Saving models (SavedModel/H5) and deploying via TF Serving, TF Lite, and TF.js. |
+| **[Session 11](./Session_11_Fine_Tuning_and_Hyperparameters/)** | **Fine-Tuning & Hyperparameters** | Transfer Learning with pre-trained models (MobileNet) and automated Hyperparameter tuning using Keras Tuner. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
