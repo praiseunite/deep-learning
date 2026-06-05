@@ -51,6 +51,8 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 06](./Session_06_Activation_Functions_Deep_Dive/)** | **Activation Functions Deep Dive** | "Warping space", the Dying ReLU problem, and variants like Leaky ReLU, ELU, and Swish. |
 | **[Session 07](./Session_07_Backpropagation_Variants/)** | **Backpropagation Variants** | The difference between Batch, Stochastic, and Mini-Batch Gradient Descent and hardware limits. |
 | **[Session 08](./Session_08_Regularization/)** | **Regularization** | Combating Overfitting using L1/L2 penalties, Dropout layers, and Early Stopping Callbacks. |
+| **[Session 09](./Session_09_TensorFlow_and_Keras/)** | **TensorFlow and Keras** | Computational Graphs, Tensors, and the Keras Functional API. |
+| **[Session 10](./Session_10_Model_Deployment/)** | **Model Deployment** | Saving models (SavedModel/H5) and deploying via TF Serving, TF Lite, and TF.js. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
