@@ -62,6 +62,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 17](./Session_17_Classic_CNNs_and_NLP/)** | **Classic CNNs & NLP** | History (LeNet to AlexNet) and 1D Convolutions for sequential text data. |
 | **[Session 18](./Session_18_Advanced_CNN_Architectures/)** | **Advanced CNN Architectures** | Deep dive into the ImageNet titans: VGGNet, InceptionNet, and ResNet. |
 | **[Session 19](./Session_19_Zero_to_Hero_Workshop/)** | **Zero-to-Hero Workshop** | Hand-holding setup of Kaggle, Cloud GPUs, and executing a first model. |
+| **[Session 20](./Session_20_Recurrent_Neural_Networks/)** | **Recurrent Neural Networks** | Sequential data, Backpropagation Through Time (BPTT), and the Vanishing Gradient problem. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
