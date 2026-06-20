@@ -58,6 +58,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 13](./Session_13_Workshop_Try_It_Yourself/)** | **Workshop: End-to-End Training** | A hands-on coding lab covering Sessions 4-7. Building, compiling, and training a model on CIFAR-10. |
 | **[Session 14](./Session_14_Deep_vs_Shallow_Networks/)** | **Deep vs Shallow Networks** | Universal Approximation Theorem and the power of Hierarchical Feature Learning. |
 | **[Session 15](./Session_15_Network_Efficiency/)** | **Network Efficiency** | Shrinking models for mobile deployment using Pruning, Quantization, and Knowledge Distillation. |
+| **[Session 16](./Session_16_Convolutional_Neural_Networks/)** | **Convolutional Neural Networks** | Introduction to CNNs, Kernels, Convolution operations, and Spatial Hierarchy. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
