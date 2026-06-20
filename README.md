@@ -59,6 +59,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 14](./Session_14_Deep_vs_Shallow_Networks/)** | **Deep vs Shallow Networks** | Universal Approximation Theorem and the power of Hierarchical Feature Learning. |
 | **[Session 15](./Session_15_Network_Efficiency/)** | **Network Efficiency** | Shrinking models for mobile deployment using Pruning, Quantization, and Knowledge Distillation. |
 | **[Session 16](./Session_16_Convolutional_Neural_Networks/)** | **Convolutional Neural Networks** | Introduction to CNNs, Kernels, Convolution operations, and Spatial Hierarchy. |
+| **[Session 17](./Session_17_Classic_CNNs_and_NLP/)** | **Classic CNNs & NLP** | History (LeNet to AlexNet) and 1D Convolutions for sequential text data. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
