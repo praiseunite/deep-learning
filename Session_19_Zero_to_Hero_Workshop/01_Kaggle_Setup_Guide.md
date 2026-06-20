@@ -13,7 +13,8 @@
 2. [Step 1: Creating an Account & Phone Verification](#2-step-1-creating-an-account--phone-verification)
 3. [Step 2: Starting a New Notebook](#3-step-2-starting-a-new-notebook)
 4. [Step 3: Turning on the GPU](#4-step-3-turning-on-the-gpu)
-5. [Step 4: The 'Play' Button](#5-step-4-the-play-button)
+5. [The 30-Hour Quota Limit](#5-the-30-hour-quota-limit)
+6. [Step 4: The 'Play' Button](#6-step-4-the-play-button)
 
 ---
 
@@ -61,9 +62,21 @@ By default, Kaggle gives you a standard CPU. Deep Learning requires a GPU.
    *(Note: If these options are grayed out, it means you did not complete the Phone Verification in Step 1!)*
 5. The notebook will briefly reboot. When it turns back on, you have a massive graphics card at your disposal!
 
+## 5. The 30-Hour Quota Limit
+
+Kaggle gives every user **30 free hours of GPU usage per week**. Once you hit 30 hours, you have to wait until the next week to use the GPU again (though standard CPUs are always unlimited).
+
+![Kaggle GPU Quota](./Assets/03_Kaggle_Quota.png)
+
+**How to check your hours:**
+1. Click your Profile Picture in the top right of Kaggle.
+2. Click **Settings**.
+3. Scroll down to the **Quotas** section. Here you will see a progress bar showing exactly how many of your 30 hours you have consumed.
+*(Tip: Always click the "Stop Session" power button in your notebook when you are done working so you don't waste hours!)*
+
 ---
 
-## 5. Step 4: The 'Play' Button
+## 6. Step 4: The 'Play' Button
 
 In a Notebook, you write code inside blocks called "Cells".
 
