@@ -61,6 +61,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 16](./Session_16_Convolutional_Neural_Networks/)** | **Convolutional Neural Networks** | Introduction to CNNs, Kernels, Convolution operations, and Spatial Hierarchy. |
 | **[Session 17](./Session_17_Classic_CNNs_and_NLP/)** | **Classic CNNs & NLP** | History (LeNet to AlexNet) and 1D Convolutions for sequential text data. |
 | **[Session 18](./Session_18_Advanced_CNN_Architectures/)** | **Advanced CNN Architectures** | Deep dive into the ImageNet titans: VGGNet, InceptionNet, and ResNet. |
+| **[Session 19](./Session_19_Zero_to_Hero_Workshop/)** | **Zero-to-Hero Workshop** | Hand-holding setup of Kaggle, Cloud GPUs, and executing a first model. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
