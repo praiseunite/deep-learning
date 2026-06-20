@@ -60,6 +60,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 15](./Session_15_Network_Efficiency/)** | **Network Efficiency** | Shrinking models for mobile deployment using Pruning, Quantization, and Knowledge Distillation. |
 | **[Session 16](./Session_16_Convolutional_Neural_Networks/)** | **Convolutional Neural Networks** | Introduction to CNNs, Kernels, Convolution operations, and Spatial Hierarchy. |
 | **[Session 17](./Session_17_Classic_CNNs_and_NLP/)** | **Classic CNNs & NLP** | History (LeNet to AlexNet) and 1D Convolutions for sequential text data. |
+| **[Session 18](./Session_18_Advanced_CNN_Architectures/)** | **Advanced CNN Architectures** | Deep dive into the ImageNet titans: VGGNet, InceptionNet, and ResNet. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
