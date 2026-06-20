@@ -56,6 +56,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 11](./Session_11_Fine_Tuning_and_Hyperparameters/)** | **Fine-Tuning & Hyperparameters** | Transfer Learning with pre-trained models (MobileNet) and automated Hyperparameter tuning using Keras Tuner. |
 | **[Session 12](./Session_12_Search_Strategies_and_AutoML/)** | **Search Strategies & AutoML** | Grid vs Random vs Bayesian Optimization, and the philosophy of AutoML. |
 | **[Session 13](./Session_13_Workshop_Try_It_Yourself/)** | **Workshop: End-to-End Training** | A hands-on coding lab covering Sessions 4-7. Building, compiling, and training a model on CIFAR-10. |
+| **[Session 14](./Session_14_Deep_vs_Shallow_Networks/)** | **Deep vs Shallow Networks** | Universal Approximation Theorem and the power of Hierarchical Feature Learning. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
