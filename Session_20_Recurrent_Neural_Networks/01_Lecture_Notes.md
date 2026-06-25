@@ -45,7 +45,21 @@ To understand an RNN, we "unroll" it. Imagine looking at a timeline:
 How does an RNN learn? In a standard network, we use Backpropagation to send the error signal backwards through the layers.
 
 In an RNN, we use **Backpropagation Through Time (BPTT)**. 
-Because the network is "unrolled" across a timeline, the error signal doesn't just travel backwards through the layers—it literally travels backwards in time, from step `t=3` back to `t=2` and `t=1`, adjusting the weights at every step.
+Because the network is "unrolled" across a timeline, the error signal doesn't just travel backwards through the layers—it literally travels backwards in time, from step `t=3` back to `t=2` and `t=1`.
+
+### The Mathematics of the Hidden State
+At any given time step $t$, the RNN calculates its new memory (Hidden State, $h_t$) using this exact equation:
+$$h_t = \tanh(W_h h_{t-1} + W_x x_t + b)$$
+
+Where:
+- $h_{t-1}$ is the memory from the previous time step.
+- $x_t$ is the current input (e.g., the current word).
+- $W_h$ and $W_x$ are the weights the network is trying to learn.
+- $\tanh$ is the activation function that keeps the numbers squashed between -1 and 1 so they don't explode.
+
+### The Chain Rule in Time
+To update the weights $W_h$, we must calculate the derivative (gradient) of the Loss with respect to $W_h$. According to the Calculus Chain Rule, the gradient at time step $t=3$ depends on the gradient at $t=2$, which depends on $t=1$.
+$$\frac{\partial L}{\partial W_h} = \sum_{t=1}^{T} \frac{\partial L_t}{\partial W_h}$$
 
 ---
 
@@ -53,12 +67,15 @@ Because the network is "unrolled" across a timeline, the error signal doesn't ju
 
 While RNNs sound perfect for sequences, they have a massive flaw: **Short-Term Memory**.
 
-Because BPTT forces the error signal to travel backwards through time, it must undergo continuous mathematical multiplication.
-If you have a sentence that is 50 words long, the error signal has to multiply itself 50 times to get back to the first word.
+Because BPTT forces the error signal to travel backwards through time via the Chain Rule, it must undergo continuous mathematical multiplication. 
+Look at the hidden state equation again. Every time we step backward in time, we multiply by the weight matrix $W_h$.
 
-If those gradient numbers are smaller than 1 (e.g., 0.5), multiplying them 50 times causes the number to shrink to essentially zero (0.5 * 0.5 * 0.5... = 0.0000001).
+If you have a sentence that is 50 words long, the error signal has to multiply by $W_h$ 50 times to get back to the first word ($W_h^{50}$).
 
-This is called the **Vanishing Gradient Problem**. The gradient vanishes before it reaches the start of the sentence, meaning the RNN completely forgets the beginning of a long paragraph!
+- **Vanishing:** If the values in $W_h$ are smaller than 1 (e.g., 0.5), multiplying them 50 times causes the gradient to shrink to essentially zero (0.5 * 0.5 * 0.5... = 0.0000001).
+- **Exploding:** If the values are larger than 1 (e.g., 1.5), the gradient explodes to infinity.
+
+When the gradient vanishes, the weights for the early time steps never update. This means the RNN completely forgets the beginning of a long paragraph!
 
 ---
 
