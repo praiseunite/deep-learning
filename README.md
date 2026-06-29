@@ -63,6 +63,7 @@ Navigate to the folders below to access the Lecture Notes, In-Class Tasks, Homew
 | **[Session 18](./Session_18_Advanced_CNN_Architectures/)** | **Advanced CNN Architectures** | Deep dive into the ImageNet titans: VGGNet, InceptionNet, and ResNet. |
 | **[Session 19](./Session_19_Zero_to_Hero_Workshop/)** | **Zero-to-Hero Workshop** | Hand-holding setup of Kaggle, Cloud GPUs, and executing a first model. |
 | **[Session 20](./Session_20_Recurrent_Neural_Networks/)** | **Recurrent Neural Networks** | Sequential data, Backpropagation Through Time (BPTT), and the Vanishing Gradient problem. |
+| **[Session 21](./Session_21_RNN_Text_Generation/)** | **RNN Text Generation** | Sequential data representation, One-Hot Encoding, and Autoregressive generation. |
 
 > **Note to Students:** The `Solutions/` directories are intentionally excluded from this public repository. You must complete the in-class tasks and assignments yourself!
 
