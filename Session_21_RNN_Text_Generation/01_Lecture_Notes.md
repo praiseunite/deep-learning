@@ -40,7 +40,7 @@ Since we have 4 total unique characters in our vocabulary, each character become
 - `L`: `[0, 0, 1, 0]`
 - `O`: `[0, 0, 0, 1]`
 
-![Data Representation](./Assets/01_Data_Representation.png)
+![Data Representation](Assets/01_Data_Representation.png)
 
 Now, the text is a pure mathematical matrix that the RNN can multiply weights against!
 
@@ -65,7 +65,7 @@ Once the RNN is fully trained on how to predict the next letter, how do we get i
 
 Autoregression simply means feeding the output back in as the new input in a continuous loop.
 
-![Autoregression](./Assets/02_Autoregression.png)
+![Autoregression](Assets/02_Autoregression.png)
 
 ### The Generation Loop:
 1. **The Seed:** We give the network a starting prompt, like `"H"`.
