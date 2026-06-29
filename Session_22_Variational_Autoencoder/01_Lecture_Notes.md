@@ -32,7 +32,7 @@ An Autoencoder does the same thing with data:
 1. **The Encoder** takes a large input (like a 28x28 image = 784 numbers) and *compresses* it down to a tiny vector (say, just 2 numbers). This tiny vector is called the **Latent Representation** or **Latent Code**.
 2. **The Decoder** takes that tiny vector and tries to *reconstruct* the original image from it.
 
-![Autoencoder Architecture](./Assets/01_Autoencoder_Architecture.png)
+![Autoencoder Architecture](Assets/01_Autoencoder_Architecture.png)
 
 ```
 INPUT IMAGE (784 pixels)
@@ -81,7 +81,7 @@ Think of the latent space as a map. A regular autoencoder places each digit imag
 
 But what happens if you pick a random coordinate *between* those clusters, like (0.0, 0.0), and feed it to the Decoder? You get garbage -- a blurry meaningless blob. The autoencoder never learned what belongs at that point on the map.
 
-![Latent Space Problem](./Assets/02_Latent_Space_Problem.png)
+![Latent Space Problem](Assets/02_Latent_Space_Problem.png)
 
 **This is the core limitation:** Regular autoencoders are good at *compression* but terrible at *generation*.
 
@@ -99,7 +99,7 @@ Instead of saying "this digit 7 is at exactly coordinate (2.1, -0.5)," the VAE s
 
 Because every image now maps to a *cloud* instead of a *dot*, the clouds overlap and fill the gaps in the latent space. Now, every point on the map produces something meaningful!
 
-![VAE Latent Space](./Assets/03_VAE_Latent_Space.png)
+![VAE Latent Space](Assets/03_VAE_Latent_Space.png)
 
 ### The VAE Architecture
 
@@ -158,7 +158,7 @@ Think of two opposing forces pulling on a rubber band:
 
 The battle between these two forces creates a **sweet spot**: the clusters are spread enough to be distinguishable, but close enough that the space between them is smooth and continuous. This is what allows us to generate new, realistic images by sampling from *anywhere* in the latent space.
 
-![VAE Loss Forces](./Assets/04_VAE_Loss_Forces.png)
+![VAE Loss Forces](Assets/04_VAE_Loss_Forces.png)
 
 ### Why log_var Instead of var?
 
