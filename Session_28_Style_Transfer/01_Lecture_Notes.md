@@ -27,7 +27,7 @@
 2. **Style Image:** The artistic style you want to apply (e.g., Van Gogh's "Starry Night," a Picasso painting)
 3. **Output:** A new image that has the **content** of image 1 but rendered in the **style** of image 2
 
-![Style Transfer Pipeline](./Assets/01_Style_Transfer_Pipeline.png)
+![Style Transfer Pipeline](Assets/01_Style_Transfer_Pipeline.png)
 
 ```
 CONTENT IMAGE          STYLE IMAGE           OUTPUT
@@ -144,7 +144,7 @@ Where:
 - $A_{ij}^l$ = Gram Matrix of the style image at layer $l$
 - $w_l$ = weight for layer $l$ (how much we care about style at this scale)
 
-![Gram Matrix](./Assets/02_Gram_Matrix_Concept.png)
+![Gram Matrix](Assets/02_Gram_Matrix_Concept.png)
 
 ---
 

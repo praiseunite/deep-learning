@@ -55,7 +55,7 @@ The Discriminator takes an image as input and outputs a **single number between 
 
 The Discriminator sees both real images from the training set AND fake images from the Generator, and must learn to tell them apart.
 
-![GAN Architecture](./Assets/01_GAN_Architecture.png)
+![GAN Architecture](Assets/01_GAN_Architecture.png)
 
 ```
 RANDOM NOISE (e.g., 100 random numbers)
@@ -142,7 +142,7 @@ $$L_G = -\frac{1}{m}\sum_{i=1}^{m}\log D(G(z_i))$$
 - If $D(G(z_i)) = 0$, then $\log(0) = -\infty$ (huge loss -- the Discriminator caught the fake immediately).
 - **In short:** "Punish the Generator whenever the Discriminator catches its fakes."
 
-![GAN Loss Curves](./Assets/02_GAN_Loss_Curves.png)
+![GAN Loss Curves](Assets/02_GAN_Loss_Curves.png)
 
 ---
 

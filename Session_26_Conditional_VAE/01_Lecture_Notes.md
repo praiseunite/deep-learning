@@ -59,7 +59,7 @@ Decoder Input: latent code (2 numbers) + label (10 one-hot) = 12 inputs
                 should I use?"            I generate?"
 ```
 
-![CVAE Architecture](./Assets/01_CVAE_Architecture.png)
+![CVAE Architecture](Assets/01_CVAE_Architecture.png)
 
 ### Full Architecture Diagram
 

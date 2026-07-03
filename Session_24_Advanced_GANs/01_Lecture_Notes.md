@@ -29,7 +29,7 @@ Our Session 23 GAN had three major problems. Understanding them is essential bef
 ### The Restaurant Analogy
 Imagine a chef (Generator) who is judged by a single food critic (Discriminator). The chef discovers that the critic loves spaghetti. So the chef stops cooking anything else -- every dish is spaghetti. The critic keeps giving high scores because the spaghetti is great, but the restaurant's menu has "collapsed" to a single item.
 
-![Mode Collapse](./Assets/01_Mode_Collapse.png)
+![Mode Collapse](Assets/01_Mode_Collapse.png)
 
 ### Problem 2: Training Instability
 
@@ -81,7 +81,7 @@ INPUT IMAGE (28, 28, 1)
    Flatten -> Dense(1, sigmoid)  --> 0.0 to 1.0
 ```
 
-![DCGAN Architecture](./Assets/02_DCGAN_Architecture.png)
+![DCGAN Architecture](Assets/02_DCGAN_Architecture.png)
 
 ### DCGAN Best Practices (The "Recipe")
 
@@ -120,7 +120,7 @@ Generator Input = [noise_1, noise_2, ..., noise_100, 0, 0, 0, 0, 0, 0, 0, 1, 0, 
                    Total input size: 110
 ```
 
-![cGAN Architecture](./Assets/03_cGAN_Architecture.png)
+![cGAN Architecture](Assets/03_cGAN_Architecture.png)
 
 ### Why cGANs Matter
 
