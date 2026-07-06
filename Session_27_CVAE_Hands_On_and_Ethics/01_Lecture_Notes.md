@@ -32,11 +32,14 @@ Instead of a single condition, we can create a "multi-condition vector." This is
 [ ] Style: Low-top
 ```
 
-We feed this entire checklist into the CVAE. 
+We feed this entire checklist into the CVAE.
+
+![Multi-Condition Checklist](Assets/01_Multi_Condition_Checklist.png)
+*The AI accepts a full checklist of demands and generates an output that satisfies ALL of them at once.*
 
 ### The Challenge
-The network can easily handle the checklist. The *hard part* is getting the data! 
-To train an AI to understand this checklist, you need thousands of images where a human has manually checked every single box for every single image. 
+The network can easily handle the checklist. The *hard part* is getting the data!
+To train an AI to understand this checklist, you need thousands of images where a human has manually checked every single box for every single image.
 - **CelebA Dataset:** This is a famous dataset of celebrity faces where humans have checked 40 boxes for every face (e.g., "Wearing Glasses," "Smiling," "Has Hat").
 
 By feeding these checklists into our CVAE, we can eventually say: *"Generate a face that is smiling and wearing glasses,"* and the AI will perfectly execute the checklist!
@@ -59,6 +62,9 @@ We must always design AI defensively. Ask yourself: **"If an evil person stole m
 **What it is:** Using generative AI to create fake videos or images of real people—putting words in their mouths that they never said.
 **The Harm:** Deepfakes can be used to ruin reputations, scam companies out of millions of dollars over fake video calls, or spread fake news during elections.
 **Our Responsibility:** Always clearly label or watermark AI-generated content so people know it is not real.
+
+![Deepfake Ethics](Assets/02_Deepfake_Ethics.png)
+*Real (✅) vs AI-Generated Fake (⚠️). Watermarking and consent frameworks are our first line of defence.*
 
 ### Danger 2: Bias and Stereotypes
 **What it is:** AI learns entirely from its training data. If we feed it biased data, it becomes biased.

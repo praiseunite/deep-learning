@@ -47,6 +47,9 @@ To make our final image, we start with a blank canvas and we hire the critics to
 
 By listening to both groups of critics at the same time, we end up painting a house using Van Gogh's brushstrokes!
 
+![Art Critics Analogy](Assets/03_Art_Critics_Analogy.png)
+*Early layer critics analyse brushstrokes (Style). Deep layer critics analyse the subject — is that a house or a dog? (Content).*
+
 ---
 
 ## 3. The Texture Matcher (Gram Matrix)
@@ -63,6 +66,9 @@ By forcing our blank canvas to have the exact same Gram Matrix (Texture Matches)
 
 ![Gram Matrix](Assets/02_Gram_Matrix_Concept.png)
 *(The math behind the scenes just multiplies features together to find these texture matches!)*
+
+![Texture Matcher](Assets/04_Texture_Matcher.png)
+*Blue swirls always come together — the Gram Matrix records that relationship and applies it everywhere on the canvas.*
 
 ---
 

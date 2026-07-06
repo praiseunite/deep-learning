@@ -43,8 +43,11 @@ Imagine a magical Vending Machine that creates shoes.
 
 When you press the "Sneaker" button and drop in the coin, the machine combines both pieces of information and outputs a unique sneaker!
 
+![Vending Machine Analogy](Assets/02_Vending_Machine_Analogy.png)
+*The button = the Condition (what category you want). The coin = the Latent Code (the random variation).*
+
 ![CVAE Architecture](Assets/01_CVAE_Architecture.png)
-*(Note: The diagram above shows the full technical architecture, but think of it just like the vending machine!)*
+*(The diagram above shows the full technical architecture — think of it just like the vending machine!)*
 
 ---
 
@@ -64,6 +67,9 @@ It doesn't waste time remembering things it already knows!
 **How the Decoder uses it:**
 The Decoder is the chef. We tell the chef, *"Make an Italian dish (Label) and add the spicy-thin-pasta variation (Latent Code)."*
 Because the chef knows the category, they know exactly what base ingredients to use, and they just apply the variations!
+
+![Chef Analogy](Assets/03_Chef_Analogy.png)
+*Label = the recipe category. Latent Code = the chef's personal spice rack.*
 
 ### The Code is Surprisingly Simple!
 To build this, we don't need complex new layers. We literally just concatenate (glue together) the label and the image!
