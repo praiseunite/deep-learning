@@ -162,8 +162,7 @@ iface = gr.Interface(
     inputs=gr.Image(type="pil", label="Upload Land Document Scan"),
     outputs=gr.Text(label="AI Analysis Result"),
     title="Nomentral AI - Land Document Verification",
-    description="Upload a scanned land document. The AI will verify the security seals to detect forgeries.",
-    allow_flagging="never"
+    description="Upload a scanned land document. The AI will verify the security seals to detect forgeries."
 )
 
 # 4. Launch the app!
