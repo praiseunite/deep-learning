@@ -403,6 +403,46 @@ print("You have just re-ran the entire course in one notebook!")
 
 ---
 
+## 🏢 MACHINE 6 — The Fraud Detector (Real-World Deployment)
+*The Capstone Bonus | Business Use Case*
+
+> **What is this machine doing?** Solving a real business problem. We simulate Nomentral (a PropTech company) needing to catch forged land documents. We train a CNN to spot fake seals, then save it so it can be deployed to a real web app.
+
+### Cell 6A: Generate Dummy Documents & Train the Fraud AI
+```python
+import os
+os.makedirs("nomentral/authentic", exist_ok=True)
+os.makedirs("nomentral/fraudulent", exist_ok=True)
+
+# Generate dummy images
+for i in range(50):
+    auth = np.ones((64, 64, 3)) * 255; auth[10:20, 10:20] = [0, 0, 0] # Real seal is black
+    tf.keras.preprocessing.image.save_img(f"nomentral/authentic/a_{i}.jpg", auth)
+    fake = np.ones((64, 64, 3)) * 255; fake[10:20, 10:20] = [100, 100, 100] # Fake seal is grey
+    tf.keras.preprocessing.image.save_img(f"nomentral/fraudulent/f_{i}.jpg", fake)
+
+fraud_data = keras.preprocessing.image_dataset_from_directory("nomentral", image_size=(64, 64), batch_size=16)
+
+fraud_ai = keras.Sequential([
+    layers.Rescaling(1./255, input_shape=(64, 64, 3)),
+    layers.Conv2D(8, 3, activation='relu'),
+    layers.MaxPooling2D(),
+    layers.Flatten(),
+    layers.Dense(1, activation='sigmoid') # 0 = Authentic, 1 = Fraudulent
+])
+
+fraud_ai.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+print("\nTraining Nomentral Fraud Detector...")
+fraud_ai.fit(fraud_data, epochs=3, verbose=0)
+print("✅ Fraud Detector Trained!")
+
+# SAVE IT FOR DEPLOYMENT!
+fraud_ai.save("nomentral_fraud_ai.keras")
+print("💾 Model saved as 'nomentral_fraud_ai.keras'. You can now download it and upload to Hugging Face!")
+```
+
+---
+
 ## 🏆 Final Reflection (5 minutes)
 
 In a Markdown cell in your notebook, answer these in your own words:
