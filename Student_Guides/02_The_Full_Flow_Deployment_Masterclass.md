@@ -117,6 +117,7 @@ tensorflow==2.15.0
 numpy
 gradio
 Pillow
+spaces
 ```
 4. Click **Commit new file to main**.
 
@@ -131,11 +132,13 @@ import gradio as gr
 import tensorflow as tf
 import numpy as np
 from PIL import Image
+import spaces
 
 # 1. Load the AI brain you uploaded
 model = tf.keras.models.load_model('nomentral_fraud_ai.keras')
 
 # 2. Define the prediction function
+@spaces.GPU
 def predict_document(image):
     # Resize the user's uploaded image to exactly what the AI expects (100x100)
     image = image.resize((100, 100))
