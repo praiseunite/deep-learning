@@ -137,8 +137,12 @@ import spaces
 # 1. Load the AI brain you uploaded
 model = tf.keras.models.load_model('nomentral_fraud_ai.keras')
 
-# 2. Define the prediction function
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement
 @spaces.GPU
+def dummy_function():
+    pass
+
+# 2. Define the prediction function (Runs safely on CPU to avoid CUDA conflicts)
 def predict_document(image):
     # Resize the user's uploaded image to exactly what the AI expects (100x100)
     image = image.resize((100, 100))
