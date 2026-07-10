@@ -3,7 +3,7 @@
 ---
 
 > **Instructor's Note:**
-> *"Welcome to the most important document in this course. You have seen the theory, and you have seen the final code in our sessions. But how do you actually DO it yourself? Where do you click? How do you get photos into the code? This guide is your step-by-step roadmap to building deep learning models from absolute zero."*
+> *"Welcome to the most important document in this course. You have seen the theory, and you have seen the final code in our sessions. But how do you actually DO it yourself? Where do you click? How do you get photos into the code? And most importantly — how do you take your AI out of the code and put it in the real world where non-technical people can test it? This guide is your roadmap."*
 
 ---
 
@@ -11,6 +11,8 @@
 1. [Part 1: Kaggle from Zero (How to Survive)](#part-1-kaggle-from-zero-how-to-survive)
 2. [Part 2: The Data Playbook (How to Get Data)](#part-2-the-data-playbook-how-to-get-data)
 3. [Part 3: The 5 Machines (Topic-by-Topic Build Guide)](#part-3-the-5-machines-topic-by-topic-build-guide)
+4. [Part 4: The Taste Test (Deploying to the Real World)](#part-4-the-taste-test-deploying-to-the-real-world)
+5. [Part 5: Before and After (Proving the AI Works)](#part-5-before-and-after-proving-the-ai-works)
 
 ---
 
@@ -70,7 +72,7 @@ photo_path = keras.utils.get_file(
 ```
 
 ### Method C: Uploading Your Own Photos (The "Add Data" Button)
-Want to use a selfie from your phone?
+Want to use a selfie from your phone, or a dataset of fake land documents?
 1. On the top right of Kaggle, click **Add Data**.
 2. Click the **Upload** button (a small arrow icon).
 3. Drag and drop your `.jpg` or `.png` file.
@@ -232,6 +234,86 @@ plt.imshow(styled_image[0])
 plt.axis('off')
 plt.show()
 ```
+
+---
+
+## Part 4: The Taste Test (Deploying to the Real World)
+
+Coding a model in Kaggle is like cooking a dish in a closed kitchen. If nobody can taste it, what is the point? You cannot send Python code to your CEO or a real-world client and expect them to test it.
+
+We need to build a **User Interface (UI)** so anyone can use your AI. 
+
+### Step 1: Save Your Model
+First, save your trained brain so you can take it out of Kaggle.
+```python
+# Run this at the end of your Kaggle notebook
+model.save('my_fraud_detector.keras')
+```
+*Download this file to your computer.*
+
+### Step 2: Use Hugging Face & Gradio
+**Hugging Face Spaces** provides free hosting for AI apps. **Gradio** is a Python library that builds a beautiful website around your AI in 5 lines of code.
+
+1. Go to [HuggingFace.co](https://huggingface.co/) and create a free account.
+2. Click **Spaces ➔ Create New Space**.
+3. Choose **Gradio** as the SDK.
+4. Upload your `my_fraud_detector.keras` file.
+5. Create a file called `app.py` and write this code:
+
+```python
+import gradio as gr
+from tensorflow.keras.models import load_model
+import numpy as np
+
+# 1. Load the model you trained in Kaggle
+model = load_model('my_fraud_detector.keras')
+
+# 2. Define what happens when a user uploads an image
+def predict_fraud(image):
+    # Resize image for the model
+    image = image.reshape(1, 224, 224, 3) 
+    prediction = model.predict(image)[0][0]
+    
+    if prediction > 0.8:
+        return "🚨 FRAUDULENT DOCUMENT DETECTED"
+    else:
+        return "✅ AUTHENTIC DOCUMENT"
+
+# 3. Create the web page
+interface = gr.Interface(
+    fn=predict_fraud,          # The function to run
+    inputs=gr.Image(),         # A box for the user to drag-and-drop a photo
+    outputs=gr.Text(),         # A box to show the result
+    title="Nomentral AI - Land Document Scanner"
+)
+
+# 4. Launch the website!
+interface.launch()
+```
+
+**That's it!** Hugging Face will generate a public URL. You can send this link to your CEO, friends, or clients. They can open it on their phone, take a picture of a document, and test your AI instantly without seeing a single line of code.
+
+---
+
+## Part 5: Before and After (Proving the AI Works)
+
+When you hand your app to a non-technical person, how do they know it is actually good? You must prove the business value using a **Before and After** test.
+
+### How to run a "Blind Test"
+Do not just tell them the accuracy is 95%. Show them.
+
+1. **Get 20 test cases:** For a PropTech company, get 10 real land documents and 10 fake/forged ones. Do NOT tell the tester which is which.
+2. **The "Before" (Human Test):** Ask the non-technical user (a human auditor) to sort the 20 documents manually. 
+   - *Time taken:* 15 minutes.
+   - *Accuracy:* They caught 7 out of 10 fakes.
+3. **The "After" (AI Test):** Have the user upload those same 20 documents into your Hugging Face Gradio app.
+   - *Time taken:* 10 seconds.
+   - *Accuracy:* The AI caught 9 out of 10 fakes.
+
+### Why this matters
+By doing this, you just proved to the business that your AI is **90 times faster** and **20% more accurate** than manual labour. This is how you sell deep learning in the real world. 
+
+Always build your model, wrap it in a Gradio UI, and run a "Before and After" test.
 
 ---
 *© 2024 Aptech Limited | Deep Learning Using Neural Networks | Kaggle Survival Guide*

@@ -70,18 +70,31 @@ For example: Generate a dress → RNN writes "A flowing summer dress with blue e
 
 ---
 
-## 🛠️ Pipeline Option D — The Art Style Classifier
+## 🛠️ Pipeline Option C — The Nomentral PropTech Fraud Checker
 
-**Machines Used:** Art Machine + Classifier Machine + Vision Machine
+**Machines Used:** Vision Machine + Classifier Machine
 
 **What it does:**
-1. The **Art Machine** generates 3 versions of the same photo: Van Gogh style, Hokusai style, and Kandinsky style.
-2. The **Vision Machine** (VGG19 features) is used to extract feature maps from each styled version.
-3. A small **Classifier Machine** (ANN on top of the features) is trained to predict which art style was applied.
+1. The **Vision Machine** (VGG19 or simple CNN) is trained on a dataset of documents (e.g., photos of ID cards, invoices, or simple receipts). 
+2. The **Classifier Machine** sits on top and learns to detect visual anomalies that indicate the document is a fake or has been tampered with.
 
 **Deliverable:**
-- A demonstration that the classifier can distinguish the 3 art styles from the VGG19 feature maps.
-- A confusion matrix showing how well the classifier identifies each style.
+- A Kaggle notebook that takes a document image as input and outputs a prediction: `AUTHENTIC` or `FRAUDULENT`.
+- A written explanation of how you would deploy this to Hugging Face for a real estate company to test.
+
+---
+
+## 🛠️ Pipeline Option D — The FinTech Transaction Guardian
+
+**Machines Used:** Text/Sequence Machine + Classifier Machine
+
+**What it does:**
+1. The **Sequence Machine** (RNN or LSTM) reads a sequence of numbers representing a user's recent transactions (amounts and times).
+2. The **Classifier Machine** evaluates the final output of the RNN to flag if the sequence represents normal behavior or an anomalous fraud attempt.
+
+**Deliverable:**
+- A Kaggle notebook that generates dummy transaction data, trains the RNN, and correctly flags a sudden large transaction as `FRAUD`.
+- A Markdown cell explaining how this AI would integrate into the backend API of a mobile banking app.
 
 ---
 
