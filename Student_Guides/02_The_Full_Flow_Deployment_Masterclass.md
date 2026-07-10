@@ -29,16 +29,16 @@ os.makedirs("dataset/authentic", exist_ok=True)
 os.makedirs("dataset/fraudulent", exist_ok=True)
 
 print("Generating dummy land documents for training...")
-# Authentic: Mostly white pages with a solid black "seal" in the corner
+# Authentic: Mostly white pages with a solid BLUE "seal" in the top-left
 for i in range(100):
     img = np.ones((100, 100, 3)) * 255 # White page
-    img[10:30, 10:30] = [0, 0, 0]      # Perfect black square seal
+    img[10:30, 10:30] = [0, 0, 255]    # Blue square seal
     tf.keras.preprocessing.image.save_img(f"dataset/authentic/auth_{i}.jpg", img)
 
-# Fraudulent: Mostly white pages, but the "seal" is smudged/grey or in the wrong spot
+# Fraudulent: Mostly white pages, but the "seal" is RED and in the bottom-right
 for i in range(100):
     img = np.ones((100, 100, 3)) * 255
-    img[10:30, 10:30] = [100, 100, 100] # Smudged/grey fake seal
+    img[70:90, 70:90] = [255, 0, 0]    # Red fake seal
     tf.keras.preprocessing.image.save_img(f"dataset/fraudulent/fraud_{i}.jpg", img)
 print("Data ready!")
 ```

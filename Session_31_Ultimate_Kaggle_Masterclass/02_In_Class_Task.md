@@ -416,9 +416,9 @@ os.makedirs("nomentral/fraudulent", exist_ok=True)
 
 # Generate dummy images
 for i in range(50):
-    auth = np.ones((64, 64, 3)) * 255; auth[10:20, 10:20] = [0, 0, 0] # Real seal is black
+    auth = np.ones((64, 64, 3)) * 255; auth[10:20, 10:20] = [0, 0, 255] # Real seal is BLUE in top-left
     tf.keras.preprocessing.image.save_img(f"nomentral/authentic/a_{i}.jpg", auth)
-    fake = np.ones((64, 64, 3)) * 255; fake[10:20, 10:20] = [100, 100, 100] # Fake seal is grey
+    fake = np.ones((64, 64, 3)) * 255; fake[40:50, 40:50] = [255, 0, 0] # Fake seal is RED in bottom-right
     tf.keras.preprocessing.image.save_img(f"nomentral/fraudulent/f_{i}.jpg", fake)
 
 fraud_data = keras.preprocessing.image_dataset_from_directory("nomentral", image_size=(64, 64), batch_size=16)
