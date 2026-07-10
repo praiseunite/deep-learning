@@ -113,7 +113,7 @@ Now we leave Kaggle. We have our trained brain (`.keras` file). We need to put i
 2. Name the file exactly: `requirements.txt`
 3. Paste this exactly into the box:
 ```text
-tensorflow==2.15.0
+tensorflow
 numpy
 gradio
 Pillow
