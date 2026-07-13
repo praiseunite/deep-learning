@@ -585,10 +585,11 @@ Now we take the trained model out of Kaggle and put it on the internet where any
 3. Paste this content:
 
 ```
-tensorflow==2.15.0
-gradio==4.44.0
+tensorflow
+gradio
 numpy
 Pillow
+spaces
 ```
 
 4. Click **Commit new file**.
@@ -606,6 +607,12 @@ Pillow
 # images and the AI predicts which letter it is.
 # ============================================================
 
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with
+# TensorFlow's own CUDA detection. This line prevents the crash.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 # Gradio is the library that creates the web interface.
 import gradio as gr
 
@@ -615,15 +622,25 @@ import numpy as np
 # PIL (Pillow) for image processing.
 from PIL import Image
 
-# TensorFlow/Keras to load and run our trained model.
-from tensorflow.keras.models import load_model
+# spaces is required by Hugging Face's ZeroGPU system.
+import spaces
+
+# Now import TensorFlow AFTER disabling CUDA.
+import tensorflow as tf
 
 # -----------------------------------------------
 # STEP 1: Load the trained model
 # -----------------------------------------------
 
 # This loads the model file we uploaded from Kaggle.
-model = load_model('sign_language_model.keras')
+model = tf.keras.models.load_model('sign_language_model.keras')
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function --
+# it causes a CUDA conflict with TensorFlow.
+@spaces.GPU
+def dummy_gpu():
+    pass
 
 # The alphabet mapping (same as in training -- no J or Z).
 ALPHABET = 'ABCDEFGHIKLMNOPQRSTUVWXY'

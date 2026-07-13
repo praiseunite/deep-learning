@@ -555,9 +555,10 @@ Download both files from the Output panel:
 ## Step 8.4: Create `requirements.txt`
 
 ```
-tensorflow==2.15.0
-gradio==4.44.0
+tensorflow
+gradio
 numpy
+spaces
 ```
 
 ## Step 8.5: Create `app.py`
@@ -568,15 +569,29 @@ numpy
 # Type a seed phrase and the AI continues writing.
 # ============================================================
 
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with TF.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import gradio as gr
 import numpy as np
 import json
-from tensorflow.keras.models import load_model
+import spaces
+
+# Import TensorFlow AFTER disabling CUDA.
+import tensorflow as tf
 
 # -----------------------------------------------
 # STEP 1: Load model and config
 # -----------------------------------------------
-model = load_model('text_generator.keras')
+model = tf.keras.models.load_model('text_generator.keras')
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function.
+@spaces.GPU
+def dummy_gpu():
+    pass
 
 with open('model_config.json', 'r') as f:
     config = json.load(f)

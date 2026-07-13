@@ -489,11 +489,12 @@ Upload all 4 files: `fraud_detector.keras`, `scaler_amount.pkl`, `scaler_time.pk
 ## Step 8.4: Create `requirements.txt`
 
 ```
-tensorflow==2.15.0
-gradio==4.44.0
+tensorflow
+gradio
 numpy
 scikit-learn
 joblib
+spaces
 ```
 
 ## Step 8.5: Create `app.py`
@@ -504,16 +505,30 @@ joblib
 # Enter transaction details and the AI flags fraud.
 # ============================================================
 
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with TF.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import gradio as gr
 import numpy as np
 import json
 import joblib
-from tensorflow.keras.models import load_model
+import spaces
+
+# Import TensorFlow AFTER disabling CUDA.
+import tensorflow as tf
 
 # -----------------------------------------------
 # STEP 1: Load model, scalers, and config
 # -----------------------------------------------
-model = load_model('fraud_detector.keras')
+model = tf.keras.models.load_model('fraud_detector.keras')
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function.
+@spaces.GPU
+def dummy_gpu():
+    pass
 scaler_amount = joblib.load('scaler_amount.pkl')
 scaler_time = joblib.load('scaler_time.pkl')
 

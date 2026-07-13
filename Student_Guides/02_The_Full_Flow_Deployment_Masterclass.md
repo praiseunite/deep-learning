@@ -128,21 +128,29 @@ This is the magic part. We will write 20 lines of Python that turns your AI into
 3. Paste this code:
 
 ```python
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with TF.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import gradio as gr
-import tensorflow as tf
 import numpy as np
 from PIL import Image
 import spaces
 
+# Import TensorFlow AFTER disabling CUDA.
+import tensorflow as tf
+
 # 1. Load the AI brain you uploaded
 model = tf.keras.models.load_model('nomentral_fraud_ai.keras')
 
-# Dummy function to satisfy Hugging Face's ZeroGPU requirement
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function.
 @spaces.GPU
 def dummy_function():
     pass
 
-# 2. Define the prediction function (Runs safely on CPU to avoid CUDA conflicts)
+# 2. Define the prediction function (Runs safely on CPU)
 def predict_document(image):
     # Resize the user's uploaded image to exactly what the AI expects (100x100)
     image = image.resize((100, 100))

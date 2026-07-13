@@ -512,10 +512,18 @@ print(classification_report(all_labels, all_preds, target_names=CLASS_NAMES))
 # What this cell does: Saves the trained model to a file
 # ============================================================
 
-model.save('scene_classifier.keras')
+# IMPORTANT: We save in SavedModel format (a folder), NOT .keras format.
+# Why? Hugging Face upgraded to Python 3.12, which installs a newer TensorFlow.
+# The .keras format sometimes breaks when the TF version on Kaggle differs from
+# the TF version on Hugging Face. SavedModel format is more portable.
+model.save('scene_classifier_saved_model')
 
-print("Model saved as 'scene_classifier.keras'")
-print("To download: Right panel -> Output -> click the file -> Download")
+print("Model saved as 'scene_classifier_saved_model/' (a folder)")
+print("To download: Right panel -> Output -> click the folder -> Download as ZIP")
+
+# Also save as .keras as a backup (works if TF versions match).
+model.save('scene_classifier.keras')
+print("Also saved scene_classifier.keras as backup.")
 ```
 
 ### Cell 15: Verify
@@ -526,7 +534,7 @@ print("To download: Right panel -> Output -> click the file -> Download")
 # What this cell does: Loads the saved model and checks it works
 # ============================================================
 
-loaded_model = keras.models.load_model('scene_classifier.keras')
+loaded_model = keras.models.load_model('scene_classifier_saved_model')
 
 # Test on one batch.
 for images, labels in test_dataset.take(1):
@@ -546,7 +554,9 @@ print("\nSaved model works correctly!")
 ## Step 8.1: Download the Model
 
 1. In Kaggle, click **Output** on the right panel.
-2. Find `scene_classifier.keras` and click **Download**.
+2. You should see `scene_classifier_saved_model/` (a folder) and `scene_classifier.keras` (a file).
+3. Download the **`scene_classifier.keras`** file first (simpler to upload).
+4. If `.keras` fails on Hugging Face later (TF version mismatch), download the `scene_classifier_saved_model/` folder as a ZIP instead.
 
 ## Step 8.2: Create a Hugging Face Space
 
@@ -566,19 +576,30 @@ print("\nSaved model works correctly!")
 
 ## Step 8.4: Create `requirements.txt`
 
+> **IMPORTANT:** Do NOT pin version numbers (e.g. `tensorflow==2.15.0`).
+> Hugging Face runs Python 3.12. Pinning old TF versions will cause install failures.
+> Leave versions unpinned so HF installs the latest compatible version.
+
 1. **Add file** -> **Create a new file** -> name it `requirements.txt`.
 2. Paste:
 
 ```
-tensorflow==2.15.0
-gradio==4.44.0
+tensorflow
+gradio
 numpy
 Pillow
+spaces
 ```
 
 3. Click **Commit new file**.
 
 ## Step 8.5: Create `app.py`
+
+> **Why this `app.py` looks different from a normal script:**
+> Hugging Face Spaces uses a system called **ZeroGPU** that requires special handling.
+> If you don't set `CUDA_VISIBLE_DEVICES` to empty AND add a `@spaces.GPU` dummy function,
+> TensorFlow will crash with a CUDA conflict error even on CPU-only Spaces.
+> The code below includes all the fixes we discovered through testing.
 
 1. **Add file** -> **Create a new file** -> name it `app.py`.
 2. Paste this complete code:
@@ -587,17 +608,52 @@ Pillow
 # ============================================================
 # app.py -- Scene Classifier Web App
 # Upload a photo and the AI tells you what scene it is.
+#
+# HUGGING FACE COMPATIBILITY NOTES (Python 3.12 + ZeroGPU):
+# 1. We set CUDA_VISIBLE_DEVICES="" BEFORE importing TensorFlow.
+#    This forces TF to use CPU only and prevents CUDA conflicts
+#    with Hugging Face's ZeroGPU system.
+# 2. We add a @spaces.GPU dummy function. HF's infrastructure
+#    requires at least one function with this decorator, even
+#    on CPU-only Spaces. Without it, the build may fail.
+# 3. We use unpinned tensorflow in requirements.txt because
+#    HF runs Python 3.12 and older TF versions won't install.
 # ============================================================
+
+import os
+# CRITICAL: Force TensorFlow to CPU-only mode BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with
+# TensorFlow's own CUDA detection. This prevents the crash.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import gradio as gr
 import numpy as np
 from PIL import Image
-from tensorflow.keras.models import load_model
+import spaces
+
+# Now import TensorFlow (after CUDA is disabled).
+import tensorflow as tf
 
 # -----------------------------------------------
 # STEP 1: Load the trained model
 # -----------------------------------------------
-model = load_model('scene_classifier.keras')
+# Try loading the .keras file first. If it fails (TF version mismatch
+# between Kaggle and HF), fall back to SavedModel format.
+try:
+    model = tf.keras.models.load_model('scene_classifier.keras')
+    print("Loaded scene_classifier.keras successfully.")
+except Exception as e:
+    print(f"Could not load .keras file: {e}")
+    print("Trying SavedModel format...")
+    model = tf.keras.models.load_model('scene_classifier_saved_model')
+    print("Loaded SavedModel successfully.")
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function --
+# it causes a CUDA conflict with TensorFlow.
+@spaces.GPU
+def dummy_gpu():
+    pass
 
 # The 6 scene classes (must match the training order).
 CLASS_NAMES = ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street']
@@ -608,14 +664,16 @@ CLASS_NAMES = ['buildings', 'forest', 'glacier', 'mountain', 'sea', 'street']
 def classify_scene(image):
     """Takes an uploaded image and returns scene predictions."""
     
+    if image is None:
+        return {"error": 1.0}
+    
     # Convert to PIL Image and resize to 150x150 (what the model expects).
-    image = Image.fromarray(image).resize((150, 150))
+    image = Image.fromarray(image).convert('RGB').resize((150, 150))
     
     # Convert to NumPy array and normalize pixels to [0, 1].
     img_array = np.array(image).astype('float32') / 255.0
     
     # Add a batch dimension: (150, 150, 3) -> (1, 150, 150, 3).
-    # The model expects a "batch" even if it's just one image.
     img_array = np.expand_dims(img_array, axis=0)
     
     # Run prediction.
@@ -644,7 +702,12 @@ demo.launch()
 
 ## Step 8.6: Wait for Build
 
-Go to **App** tab. Wait 2-5 minutes for it to build and show "Running".
+Go to **App** tab. Wait 3-5 minutes for it to build and show "Running".
+
+> **If the build fails**, click the **Logs** tab and look for the error:
+> - `"No matching distribution found for tensorflow==..."` -- You accidentally pinned a version in requirements.txt. Remove the `==` part.
+> - `"CUDA error"` or `"libcudart"` -- The `os.environ["CUDA_VISIBLE_DEVICES"] = ""` line is missing or appears AFTER the TensorFlow import. It must come BEFORE.
+> - `"Cannot deserialize"` or `"Unknown layer"` -- TF version mismatch. Upload the SavedModel folder instead of the .keras file.
 
 ---
 

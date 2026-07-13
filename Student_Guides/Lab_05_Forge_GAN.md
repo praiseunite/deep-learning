@@ -488,10 +488,11 @@ Upload both files.
 ## Step 8.4: Create `requirements.txt`
 
 ```
-tensorflow==2.15.0
-gradio==4.44.0
+tensorflow
+gradio
 numpy
 Pillow
+spaces
 ```
 
 ## Step 8.5: Create `app.py`
@@ -502,16 +503,30 @@ Pillow
 # Click "Generate" and the AI creates new handwritten digits.
 # ============================================================
 
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with TF.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import gradio as gr
 import numpy as np
 import json
 from PIL import Image
-from tensorflow.keras.models import load_model
+import spaces
+
+# Import TensorFlow AFTER disabling CUDA.
+import tensorflow as tf
 
 # -----------------------------------------------
 # STEP 1: Load model and config
 # -----------------------------------------------
-generator = load_model('digit_generator.keras')
+generator = tf.keras.models.load_model('digit_generator.keras')
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function.
+@spaces.GPU
+def dummy_gpu():
+    pass
 
 with open('model_config.json', 'r') as f:
     config = json.load(f)

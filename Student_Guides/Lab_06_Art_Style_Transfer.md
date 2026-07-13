@@ -327,11 +327,12 @@ print("You can download this from the Output panel as a sample.")
 ## Step 8.2: Create `requirements.txt`
 
 ```
-tensorflow==2.15.0
-tensorflow-hub==0.16.1
-gradio==4.44.0
+tensorflow
+tensorflow-hub
+gradio
 numpy
 Pillow
+spaces
 ```
 
 ## Step 8.3: Create `app.py`
@@ -342,11 +343,25 @@ Pillow
 # Upload a photo and a painting, get styled art instantly.
 # ============================================================
 
+import os
+# CRITICAL: Force TensorFlow to CPU-only BEFORE importing it.
+# Hugging Face's ZeroGPU injects CUDA libraries that conflict with TF.
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+
 import gradio as gr
 import numpy as np
 from PIL import Image
+import spaces
+
+# Import TensorFlow AFTER disabling CUDA.
 import tensorflow as tf
 import tensorflow_hub as hub
+
+# Dummy function to satisfy Hugging Face's ZeroGPU requirement.
+# DO NOT put @spaces.GPU on the actual predict function.
+@spaces.GPU
+def dummy_gpu():
+    pass
 
 # -----------------------------------------------
 # STEP 1: Load the pre-trained style model
