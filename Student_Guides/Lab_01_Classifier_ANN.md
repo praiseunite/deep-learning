@@ -546,6 +546,34 @@ print(f"Match: {'YES' if predicted_letter == true_letter else 'NO'}")
 print("\nThe saved model works correctly!")
 ```
 
+### Cell 16: Export for Static Deployment (Optional)
+
+> If Gradio deployment fails due to TensorFlow/Python version conflicts on Hugging Face,
+> you can deploy as a **Static** site using TensorFlow.js instead. This cell converts
+> the model to a format that runs directly in the browser -- no Python needed at all.
+
+```python
+# ============================================================
+# CELL 16: EXPORT MODEL TO TENSORFLOW.JS FORMAT (OPTIONAL)
+# What this cell does: Converts the model so it runs in a web browser
+# ============================================================
+
+!pip install tensorflowjs -q
+
+import tensorflowjs as tfjs
+
+# Convert the Keras model to TensorFlow.js format.
+tfjs.converters.save_keras_model(model, 'tfjs_model')
+
+print("TensorFlow.js model saved to 'tfjs_model/' folder!")
+import os
+for f in os.listdir('tfjs_model'):
+    size = os.path.getsize(f'tfjs_model/{f}')
+    print(f"  {f} ({size:,} bytes)")
+
+print("\nDownload the ENTIRE 'tfjs_model' folder for Static deployment.")
+```
+
 ---
 
 # PHASE 8: Deploy to Hugging Face
@@ -714,6 +742,170 @@ demo.launch()
 2. Hugging Face will install the dependencies and start the app. This takes 2-5 minutes.
 3. You will see a **Building** status, then **Running**.
 4. Once running, you will see your web app with an image upload box!
+
+---
+
+# ALTERNATIVE: Static Deployment (If Gradio Fails)
+
+> **When to use this:** If the Gradio deployment fails because of TensorFlow/Python 3.12
+> incompatibilities, CUDA errors, or dependency conflicts, use this method instead.
+> Static deployment runs the AI entirely in the user's browser using TensorFlow.js.
+> No Python needed on the server -- zero dependency problems.
+
+**Requirement:** You must have run Cell 16 in Phase 7 to export the TFJS model.
+
+## Static Step 1: Create a Static Space
+
+1. [huggingface.co](https://huggingface.co) -> Profile -> **New Space**.
+2. Name: `sign-language-static`
+3. SDK: **Static** (NOT Gradio)
+4. **Create Space**.
+
+## Static Step 2: Upload Files
+
+1. **Files** tab -> **Add file** -> **Upload files**.
+2. Upload ALL files from the `tfjs_model/` folder (`model.json`, `.bin` files).
+3. Click **Commit changes**.
+
+## Static Step 3: Create `index.html`
+
+1. **Add file** -> **Create a new file** -> name it `index.html`.
+2. Paste this complete code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Language Classifier</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a; color: #e2e8f0;
+            min-height: 100vh; display: flex; justify-content: center; padding: 20px;
+        }
+        .container { max-width: 600px; width: 100%; margin-top: 30px; }
+        h1 { font-size: 1.6rem; margin-bottom: 8px; color: #f8fafc; }
+        .subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 0.9rem; line-height: 1.5; }
+        .status { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+        .status.loading { background: #1e3a5f; color: #7dd3fc; }
+        .status.ready { background: #14532d; color: #86efac; }
+        .drop-zone {
+            border: 2px dashed #475569; border-radius: 12px; padding: 40px; text-align: center;
+            cursor: pointer; transition: border-color 0.2s; margin-bottom: 16px;
+        }
+        .drop-zone:hover, .drop-zone.dragover { border-color: #6366f1; }
+        .drop-zone img { max-width: 200px; max-height: 200px; margin-top: 12px; border-radius: 8px; }
+        .result {
+            background: #1e293b; border-radius: 8px; padding: 16px; margin-top: 16px;
+        }
+        .prediction { display: flex; align-items: center; margin: 6px 0; }
+        .prediction .letter { font-weight: bold; width: 30px; font-size: 1.1rem; }
+        .prediction .bar-bg {
+            flex: 1; height: 22px; background: #334155; border-radius: 4px; overflow: hidden; margin: 0 10px;
+        }
+        .prediction .bar {
+            height: 100%; background: #6366f1; border-radius: 4px; transition: width 0.3s;
+        }
+        .prediction .pct { width: 50px; text-align: right; font-size: 0.85rem; color: #94a3b8; }
+        .footer { text-align: center; color: #64748b; margin-top: 24px; font-size: 0.75rem; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sign Language Letter Classifier</h1>
+        <p class="subtitle">
+            Upload a hand sign image and the AI predicts the letter (A-Y, no J/Z).
+            Runs entirely in your browser using TensorFlow.js.
+        </p>
+        <div id="status" class="status loading">Loading AI model...</div>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <p>Click here or drag &amp; drop an image</p>
+            <img id="preview" style="display:none">
+        </div>
+        <input type="file" id="fileInput" accept="image/*">
+        <div class="result" id="result" style="display:none"></div>
+        <p class="footer">Sign Language Classifier | Deep Learning | Aptech<br>Powered by TensorFlow.js</p>
+    </div>
+
+    <script>
+    const ALPHABET = 'ABCDEFGHIKLMNOPQRSTUVWXY';
+    let model = null;
+
+    async function init() {
+        const s = document.getElementById('status');
+        try {
+            model = await tf.loadLayersModel('model.json');
+            s.className = 'status ready';
+            s.textContent = 'Model loaded! Upload a hand sign image.';
+        } catch(e) {
+            s.textContent = 'Error: ' + e.message;
+            s.style.background = '#450a0a'; s.style.color = '#fca5a5';
+        }
+    }
+
+    async function predict(imgElement) {
+        if (!model) return;
+
+        // Convert image to grayscale 28x28, normalize, flatten to [1, 784].
+        const tensor = tf.browser.fromPixels(imgElement, 1)
+            .resizeBilinear([28, 28])
+            .toFloat()
+            .div(255.0)
+            .reshape([1, 784]);
+
+        const predictions = await model.predict(tensor).data();
+        tensor.dispose();
+
+        // Sort by confidence.
+        const results = Array.from(predictions)
+            .map((p, i) => ({ letter: ALPHABET[i], confidence: p }))
+            .sort((a, b) => b.confidence - a.confidence);
+
+        // Display top 5.
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<h3 style="margin-bottom:12px;color:#f8fafc">Predictions</h3>' +
+            results.slice(0, 5).map(r =>
+                `<div class="prediction">
+                    <span class="letter">${r.letter}</span>
+                    <div class="bar-bg"><div class="bar" style="width:${(r.confidence*100).toFixed(1)}%"></div></div>
+                    <span class="pct">${(r.confidence*100).toFixed(1)}%</span>
+                </div>`
+            ).join('');
+    }
+
+    function handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            const img = new Image();
+            img.onload = () => predict(img);
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    document.getElementById('fileInput').addEventListener('change', e => handleFile(e.target.files[0]));
+    const dz = document.getElementById('dropZone');
+    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+    dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+    dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+
+    init();
+    </script>
+</body>
+</html>
+```
+
+3. Click **Commit new file**. The page loads instantly (no build step needed).
 
 ---
 

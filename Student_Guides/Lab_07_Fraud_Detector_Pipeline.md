@@ -470,6 +470,44 @@ print("  4. model_config.json")
 print("\nDownload ALL 4 files from the Output panel.")
 ```
 
+### Cell 15: Export for Static Deployment (Optional)
+
+> If Gradio deployment fails due to TensorFlow/Python version conflicts on Hugging Face,
+> you can deploy as a **Static** site using TensorFlow.js instead.
+
+```python
+# ============================================================
+# CELL 15: EXPORT MODEL TO TENSORFLOW.JS FORMAT (OPTIONAL)
+# What this cell does: Converts model for browser deployment
+# ============================================================
+
+!pip install tensorflowjs -q
+
+import tensorflowjs as tfjs
+
+# Convert the Keras model to TensorFlow.js format.
+tfjs.converters.save_keras_model(model, 'tfjs_model')
+
+# Save scaler parameters into the config so JavaScript can use them.
+# (The .pkl files only work in Python -- JavaScript needs the raw numbers.)
+config_static = {
+    'feature_names': feature_names,
+    'input_dim': INPUT_DIM,
+    'threshold': 0.5,
+    'scaler_amount_mean': float(scaler_amount.mean_[0]),
+    'scaler_amount_scale': float(scaler_amount.scale_[0]),
+    'scaler_time_mean': float(scaler_time.mean_[0]),
+    'scaler_time_scale': float(scaler_time.scale_[0])
+}
+
+with open('model_config_static.json', 'w') as f:
+    json.dump(config_static, f)
+
+print("TensorFlow.js model saved to 'tfjs_model/'")
+print("Static config saved to 'model_config_static.json'")
+print("\nDownload 'tfjs_model/' folder AND 'model_config_static.json' for Static deployment.")
+```
+
 ---
 
 # PHASE 8: Deploy to Hugging Face
@@ -606,6 +644,169 @@ demo.launch()
 ```
 
 Commit and wait for the build.
+
+---
+
+# ALTERNATIVE: Static Deployment (If Gradio Fails)
+
+> **When to use this:** If the Gradio deployment fails because of TensorFlow/Python 3.12
+> incompatibilities, CUDA errors, or dependency conflicts, use this method instead.
+> No Python needed -- runs entirely in the browser.
+
+**Requirement:** You must have run Cell 15 in Phase 7 to export the TFJS model and `model_config_static.json`.
+
+## Static Step 1: Create a Static Space
+
+1. [huggingface.co](https://huggingface.co) -> Profile -> **New Space**.
+2. Name: `fraud-detector-static`
+3. SDK: **Static** (NOT Gradio)
+4. **Create Space**.
+
+## Static Step 2: Upload Files
+
+1. Upload ALL files from `tfjs_model/` (`model.json`, `.bin` files).
+2. Upload `model_config_static.json`.
+3. Commit.
+
+## Static Step 3: Create `index.html`
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Card Fraud Detector</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a; color: #e2e8f0;
+            min-height: 100vh; display: flex; justify-content: center; padding: 20px;
+        }
+        .container { max-width: 650px; width: 100%; margin-top: 30px; }
+        h1 { font-size: 1.6rem; margin-bottom: 8px; color: #f8fafc; }
+        .subtitle { color: #94a3b8; margin-bottom: 24px; font-size: 0.9rem; line-height: 1.5; }
+        .status { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 16px; font-size: 0.9rem; }
+        .status.loading { background: #1e3a5f; color: #7dd3fc; }
+        .status.ready { background: #14532d; color: #86efac; }
+        label { display: block; font-weight: 600; margin: 10px 0 4px; color: #cbd5e1; font-size: 0.85rem; }
+        input[type="number"] {
+            width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 6px;
+            background: #1e293b; color: #f1f5f9; font-size: 0.95rem; outline: none;
+        }
+        input:focus { border-color: #6366f1; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+        button {
+            width: 100%; padding: 14px; border: none; border-radius: 8px;
+            background: #6366f1; color: white; font-size: 1rem; font-weight: 600;
+            cursor: pointer; margin: 20px 0 16px; transition: background 0.2s;
+        }
+        button:hover { background: #4f46e5; }
+        button:disabled { background: #334155; cursor: not-allowed; }
+        .verdict {
+            text-align: center; padding: 20px; border-radius: 10px;
+            font-size: 1.2rem; font-weight: bold;
+        }
+        .verdict.legit { background: #14532d; color: #86efac; }
+        .verdict.fraud { background: #450a0a; color: #fca5a5; }
+        .footer { text-align: center; color: #64748b; margin-top: 24px; font-size: 0.75rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Credit Card Fraud Detector</h1>
+        <p class="subtitle">
+            Enter transaction details and the AI flags fraud.
+            Runs entirely in your browser using TensorFlow.js.
+        </p>
+        <div id="status" class="status loading">Loading AI model...</div>
+
+        <label for="amount">Transaction Amount ($)</label>
+        <input type="number" id="amount" value="50.0" step="0.01">
+
+        <label for="time_sec">Time (seconds since first transaction)</label>
+        <input type="number" id="time_sec" value="40000" step="1">
+
+        <p style="margin-top:16px;color:#94a3b8;font-size:0.85rem">
+            V-Features (anonymized transaction components). Default to 0 for testing:
+        </p>
+        <div class="grid" id="vInputs"></div>
+
+        <button id="predictBtn" onclick="predict()" disabled>Analyze Transaction</button>
+        <div id="result"></div>
+        <p class="footer">Fraud Detector | Deep Learning | Aptech<br>Powered by TensorFlow.js</p>
+    </div>
+
+    <script>
+    let model = null;
+    let config = null;
+
+    // Create V1-V14 input fields.
+    const vGrid = document.getElementById('vInputs');
+    for (let i = 1; i <= 14; i++) {
+        vGrid.innerHTML += `<div><label for="v${i}">V${i}</label>
+            <input type="number" id="v${i}" value="0" step="0.01"></div>`;
+    }
+
+    async function init() {
+        const s = document.getElementById('status');
+        try {
+            const resp = await fetch('model_config_static.json');
+            config = await resp.json();
+            model = await tf.loadLayersModel('model.json');
+            s.className = 'status ready';
+            s.textContent = 'Model loaded! Enter transaction details.';
+            document.getElementById('predictBtn').disabled = false;
+        } catch(e) {
+            s.textContent = 'Error: ' + e.message;
+            s.style.background = '#450a0a'; s.style.color = '#fca5a5';
+        }
+    }
+
+    async function predict() {
+        if (!model || !config) return;
+
+        const amount = parseFloat(document.getElementById('amount').value);
+        const timeSec = parseFloat(document.getElementById('time_sec').value);
+
+        // Scale amount and time using saved scaler parameters.
+        const amountScaled = (amount - config.scaler_amount_mean) / config.scaler_amount_scale;
+        const timeScaled = (timeSec - config.scaler_time_mean) / config.scaler_time_scale;
+
+        // Gather V1-V14.
+        const vFeatures = [];
+        for (let i = 1; i <= 14; i++) {
+            vFeatures.push(parseFloat(document.getElementById('v' + i).value) || 0);
+        }
+
+        // Build 30-feature vector: V1-V14, V15-V28 (zeros), amount_scaled, time_scaled.
+        const features = [...vFeatures, ...new Array(14).fill(0), amountScaled, timeScaled];
+        const inputTensor = tf.tensor2d([features], [1, 30]);
+
+        const prediction = await model.predict(inputTensor).data();
+        inputTensor.dispose();
+
+        const prob = prediction[0];
+        const resultDiv = document.getElementById('result');
+
+        if (prob > 0.5) {
+            resultDiv.className = 'verdict fraud';
+            resultDiv.innerHTML = `FRAUDULENT<br><span style="font-size:0.9rem">Confidence: ${(prob * 100).toFixed(1)}%</span>`;
+        } else {
+            resultDiv.className = 'verdict legit';
+            resultDiv.innerHTML = `LEGITIMATE<br><span style="font-size:0.9rem">Confidence: ${((1 - prob) * 100).toFixed(1)}%</span>`;
+        }
+    }
+
+    init();
+    </script>
+</body>
+</html>
+```
+
+Commit the file. The page loads instantly -- no build step needed.
 
 ---
 

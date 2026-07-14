@@ -528,6 +528,42 @@ print(f"Test prediction: next character after '...practice an' -> '{predicted_ch
 print("Saved model works!")
 ```
 
+### Cell 15: Export for Static Deployment (Optional)
+
+> If Gradio deployment fails due to TensorFlow/Python version conflicts on Hugging Face,
+> you can deploy as a **Static** site using TensorFlow.js instead. This cell converts
+> the model to a format that runs directly in the browser -- no Python needed at all.
+
+```python
+# ============================================================
+# CELL 15: EXPORT MODEL TO TENSORFLOW.JS FORMAT (OPTIONAL)
+# What this cell does: Converts the model so it runs in a web browser
+# ============================================================
+
+# Install the TensorFlow.js converter.
+# This only needs to run once per Kaggle session.
+!pip install tensorflowjs -q
+
+import tensorflowjs as tfjs
+
+# Convert the Keras model to TensorFlow.js format.
+# This creates a folder with:
+#   - model.json (the architecture)
+#   - group1-shard1of1.bin (the weights)
+tfjs.converters.save_keras_model(model, 'tfjs_model')
+
+print("TensorFlow.js model saved to 'tfjs_model/' folder!")
+print("Files created:")
+
+import os
+for f in os.listdir('tfjs_model'):
+    size = os.path.getsize(f'tfjs_model/{f}')
+    print(f"  {f} ({size:,} bytes)")
+
+print("\nDownload the ENTIRE 'tfjs_model' folder AND 'model_config.json'.")
+print("You will need all these files for Static deployment.")
+```
+
 ---
 
 # PHASE 8: Deploy to Hugging Face
@@ -654,6 +690,369 @@ demo.launch()
 ```
 
 Commit the file. Wait 2-5 minutes for the build.
+
+---
+
+# ALTERNATIVE: Static Deployment (If Gradio Fails)
+
+> **When to use this:** If the Gradio deployment above fails because of TensorFlow/Python 3.12
+> incompatibilities, CUDA errors, or dependency conflicts, use this method instead.
+> Static deployment runs the AI **entirely in the user's browser** using TensorFlow.js.
+> No Python is needed on the server at all -- zero dependency problems.
+
+## What is a Static Space?
+
+A **Static** Hugging Face Space is just a website. You upload HTML, CSS, and JavaScript files,
+and Hugging Face serves them as a regular web page. The AI model is loaded by the browser
+using TensorFlow.js (a JavaScript version of TensorFlow).
+
+**Advantages:**
+- No Python dependencies (no TF version conflicts, no ZeroGPU issues)
+- Runs on the user's device (faster, no server queue)
+- Always free (no CPU/GPU compute on Hugging Face's side)
+
+**Requirement:** You must have run Cell 15 in Phase 7 to export the TFJS model.
+
+## Static Step 1: Create a Static Hugging Face Space
+
+1. Go to [huggingface.co](https://huggingface.co) -> Profile -> **New Space**.
+2. Name: `ai-text-generator-static`
+3. SDK: **Static** (NOT Gradio)
+4. Click **Create Space**.
+
+## Static Step 2: Upload the TFJS Model Files
+
+1. **Files** tab -> **Add file** -> **Upload files**.
+2. Upload ALL files from the `tfjs_model/` folder:
+   - `model.json`
+   - `group1-shard1of1.bin` (or similar `.bin` files)
+3. Also upload `model_config.json`.
+4. Click **Commit changes**.
+
+## Static Step 3: Create `index.html`
+
+1. **Add file** -> **Create a new file** -> name it `index.html`.
+2. Paste this complete code:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Generator (LSTM)</title>
+
+    <!-- TensorFlow.js: Runs neural networks in the browser. No Python needed. -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+
+    <style>
+        /* ---- STYLES ---- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            color: #f8fafc;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: #6366f1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-top: 4px;
+        }
+
+        .range-value {
+            color: #6366f1;
+            font-weight: bold;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #6366f1;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 16px 0;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #4f46e5; }
+        button:disabled {
+            background: #334155;
+            cursor: not-allowed;
+        }
+
+        textarea#output {
+            min-height: 200px;
+            resize: vertical;
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .status.loading {
+            background: #1e3a5f;
+            color: #7dd3fc;
+        }
+
+        .status.ready {
+            background: #14532d;
+            color: #86efac;
+        }
+
+        .status.error {
+            background: #450a0a;
+            color: #fca5a5;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            margin-top: 30px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Text Generator</h1>
+        <p class="subtitle">
+            Type a starting phrase and the AI continues writing.
+            Runs entirely in your browser using TensorFlow.js -- no server needed.
+            Trained on famous quotes using a character-level LSTM.
+        </p>
+
+        <div id="status" class="status loading">Loading AI model...</div>
+
+        <label for="seed">Seed Text</label>
+        <input type="text" id="seed" value="the best way to" placeholder="Type a starting phrase...">
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Length: <span id="lengthVal" class="range-value">200</span> chars</label>
+                <input type="range" id="length" min="50" max="500" value="200" step="50">
+            </div>
+            <div class="control-group">
+                <label>Temperature: <span id="tempVal" class="range-value">0.7</span></label>
+                <input type="range" id="temperature" min="0.1" max="2.0" value="0.7" step="0.1">
+            </div>
+        </div>
+
+        <button id="generateBtn" onclick="generateText()" disabled>Generate Text</button>
+
+        <label for="output">Generated Text</label>
+        <textarea id="output" readonly placeholder="Generated text will appear here..."></textarea>
+
+        <p class="footer">
+            AI Text Generator | Deep Learning Using Neural Networks | Aptech<br>
+            Powered by TensorFlow.js -- runs locally in your browser
+        </p>
+    </div>
+
+    <script>
+    // ============================================================
+    // JAVASCRIPT: Loads the LSTM model and generates text
+    // ============================================================
+
+    let model = null;
+    let config = null;
+
+    // Load the model and config when the page opens.
+    async function init() {
+        const statusEl = document.getElementById('status');
+        try {
+            // Load the character mappings.
+            const configResponse = await fetch('model_config.json');
+            config = await configResponse.json();
+
+            // Load the TensorFlow.js model.
+            // model.json must be in the same folder as this HTML file.
+            model = await tf.loadLayersModel('model.json');
+
+            statusEl.className = 'status ready';
+            statusEl.textContent = 'Model loaded! Ready to generate text.';
+            document.getElementById('generateBtn').disabled = false;
+        } catch (err) {
+            statusEl.className = 'status error';
+            statusEl.textContent = 'Error loading model: ' + err.message;
+            console.error(err);
+        }
+    }
+
+    // Generate text character by character.
+    async function generateText() {
+        if (!model || !config) return;
+
+        const btn = document.getElementById('generateBtn');
+        const outputEl = document.getElementById('output');
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+
+        const seedText = document.getElementById('seed').value.toLowerCase().trim() || 'the best way to';
+        const length = parseInt(document.getElementById('length').value);
+        const temperature = parseFloat(document.getElementById('temperature').value);
+        const seqLength = config.seq_length;
+        const charToIdx = config.char_to_idx;
+        const idxToChar = {};
+
+        // Rebuild idx_to_char with integer keys.
+        for (const [k, v] of Object.entries(config.idx_to_char)) {
+            idxToChar[parseInt(k)] = v;
+        }
+
+        let result = seedText;
+        outputEl.value = result;
+
+        // Generate one character at a time.
+        for (let i = 0; i < length; i++) {
+            // Take the last seqLength characters.
+            let currentSeq = result.slice(-seqLength);
+            if (currentSeq.length < seqLength) {
+                currentSeq = ' '.repeat(seqLength - currentSeq.length) + currentSeq;
+            }
+
+            // Convert characters to numbers.
+            const inputArray = currentSeq.split('').map(ch => charToIdx[ch] || 0);
+
+            // Create a TensorFlow tensor: shape [1, seqLength].
+            const inputTensor = tf.tensor2d([inputArray], [1, seqLength]);
+
+            // Run the model.
+            const predictionTensor = model.predict(inputTensor);
+            let predictions = await predictionTensor.data();
+
+            // Clean up tensors to prevent memory leaks.
+            inputTensor.dispose();
+            predictionTensor.dispose();
+
+            // Apply temperature scaling.
+            predictions = Array.from(predictions);
+            predictions = predictions.map(p => Math.log(p + 1e-8) / temperature);
+            const maxPred = Math.max(...predictions);
+            predictions = predictions.map(p => Math.exp(p - maxPred));
+            const sum = predictions.reduce((a, b) => a + b, 0);
+            predictions = predictions.map(p => p / sum);
+
+            // Sample from the distribution.
+            const rand = Math.random();
+            let cumulative = 0;
+            let nextIdx = 0;
+            for (let j = 0; j < predictions.length; j++) {
+                cumulative += predictions[j];
+                if (rand < cumulative) {
+                    nextIdx = j;
+                    break;
+                }
+            }
+
+            result += idxToChar[nextIdx] || '';
+            outputEl.value = result;
+
+            // Yield to the browser every 10 characters so the UI updates.
+            if (i % 10 === 0) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Generate Text';
+    }
+
+    // Update slider display values.
+    document.getElementById('length').addEventListener('input', function() {
+        document.getElementById('lengthVal').textContent = this.value;
+    });
+    document.getElementById('temperature').addEventListener('input', function() {
+        document.getElementById('tempVal').textContent = parseFloat(this.value).toFixed(1);
+    });
+
+    // Start loading the model.
+    init();
+    </script>
+</body>
+</html>
+```
+
+3. Click **Commit new file**.
+
+## Static Step 4: Test It
+
+1. Go to the **App** tab. The page should load in seconds (no build step).
+2. Wait for the status bar to say "Model loaded! Ready to generate text."
+3. Type a seed phrase and click **Generate Text**.
+4. The text appears character by character directly in your browser!
+
+> **Why this works without Python:**
+> TensorFlow.js downloads the model weights into the browser's memory.
+> The LSTM runs on the user's own CPU/GPU (via WebGL). Hugging Face just serves
+> the files -- it doesn't run any code. This means zero dependency conflicts.
 
 ---
 
