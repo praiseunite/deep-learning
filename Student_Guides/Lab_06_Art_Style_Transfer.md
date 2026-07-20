@@ -61,6 +61,7 @@ print("This model can apply any painting's style to any photo.")
 
 ### Cell 2: Download Sample Images
 
+```python
 # ============================================================
 # CELL 2: DOWNLOAD SAMPLE IMAGES
 # What this cell does: Gets images from TensorFlow's official servers
@@ -220,6 +221,7 @@ plt.show()
 
 ### Cell 7: Try Multiple Styles
 
+```python
 # ============================================================
 # CELL 7: TRY DIFFERENT STYLES
 # What this cell does: Applies multiple painting styles to the same photo.
