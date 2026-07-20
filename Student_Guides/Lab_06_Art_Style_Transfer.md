@@ -67,24 +67,33 @@ print("This model can apply any painting's style to any photo.")
 # What this cell does: Gets a photo and a painting from the internet
 # ============================================================
 
-# Download a content image (the photo to be styled).
-content_path = tf.keras.utils.get_file(
-    'content.jpg',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/'
-    'Golden_Gate_Bridge_%28cropped%29.jpg/800px-Golden_Gate_Bridge_%28cropped%29.jpg'
-)
+import requests
 
-# Download a style image (the painting whose style we want to copy).
-style_path = tf.keras.utils.get_file(
-    'style.jpg',
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/'
-    'Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/'
-    '800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg'
+def download_image(url, filename):
+    headers = {"User-Agent": "Mozilla/5.0"}
+    r = requests.get(url, headers=headers)
+    with open(filename, "wb") as f:
+        f.write(r.content)
+    return filename
+
+# Content image (Golden Gate Bridge)
+content_url = (
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/"
+    "Golden_Gate_Bridge_%28cropped%29.jpg/800px-Golden_Gate_Bridge_%28cropped%29.jpg"
 )
+content_path = download_image(content_url, "content.jpg")
+
+# Style image (Van Gogh - Starry Night)
+style_url = (
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/"
+    "Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/"
+    "800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+)
+style_path = download_image(style_url, "style.jpg")
 
 print("Downloaded:")
-print(f"  Content: Golden Gate Bridge")
-print(f"  Style: Van Gogh's Starry Night")
+print(f"  Content: Golden Gate Bridge → {content_path}")
+print(f"  Style: Van Gogh's Starry Night → {style_path}")
 ```
 
 ### Cell 3: Create the Image Loading Function
@@ -230,16 +239,16 @@ plt.show()
 # Download additional style images.
 styles = {
     'Starry Night': style_path,
-    'The Great Wave': tf.keras.utils.get_file(
-        'wave.jpg',
+    'The Great Wave': download_image(
         'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/'
-        'Tsunami_by_hokusai_19th_century.jpg/800px-Tsunami_by_hokusai_19th_century.jpg'
+        'Tsunami_by_hokusai_19th_century.jpg/800px-Tsunami_by_hokusai_19th_century.jpg',
+        'wave.jpg'
     ),
-    'Kandinsky': tf.keras.utils.get_file(
-        'kandinsky.jpg',
+    'Kandinsky': download_image(
         'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/'
         'Vassily_Kandinsky%2C_1913_-_Composition_7.jpg/'
-        '800px-Vassily_Kandinsky%2C_1913_-_Composition_7.jpg'
+        '800px-Vassily_Kandinsky%2C_1913_-_Composition_7.jpg',
+        'kandinsky.jpg'
     )
 }
 
