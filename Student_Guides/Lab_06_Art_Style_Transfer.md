@@ -61,39 +61,29 @@ print("This model can apply any painting's style to any photo.")
 
 ### Cell 2: Download Sample Images
 
-```python
 # ============================================================
 # CELL 2: DOWNLOAD SAMPLE IMAGES
-# What this cell does: Gets a photo and a painting from the internet
+# What this cell does: Gets images from TensorFlow's official servers
 # ============================================================
 
-import requests
+# These URLs are from TensorFlow's own official style transfer tutorial.
+# They are hosted on Google Cloud Storage -- reliable, no blocks, no size limits.
 
-def download_image(url, filename):
-    headers = {"User-Agent": "Mozilla/5.0"}
-    r = requests.get(url, headers=headers)
-    with open(filename, "wb") as f:
-        f.write(r.content)
-    return filename
-
-# Content image (Golden Gate Bridge)
-content_url = (
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/"
-    "Golden_Gate_Bridge_%28cropped%29.jpg/800px-Golden_Gate_Bridge_%28cropped%29.jpg"
+# Content image: a Yellow Labrador photo
+content_path = tf.keras.utils.get_file(
+    'content.jpg',
+    'https://storage.googleapis.com/download.tensorflow.org/example_images/YellowLabradorLooking_new.jpg'
 )
-content_path = download_image(content_url, "content.jpg")
 
-# Style image (Van Gogh - Starry Night)
-style_url = (
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/"
-    "Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/"
-    "800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg"
+# Style image: Kandinsky's "Composition 7" painting (1913)
+style_path = tf.keras.utils.get_file(
+    'style.jpg',
+    'https://storage.googleapis.com/download.tensorflow.org/example_images/Vassily_Kandinsky%2C_1913_-_Composition_7.jpg'
 )
-style_path = download_image(style_url, "style.jpg")
 
-print("Downloaded:")
-print(f"  Content: Golden Gate Bridge → {content_path}")
-print(f"  Style: Van Gogh's Starry Night → {style_path}")
+print("Downloaded from TensorFlow's official servers:")
+print(f"  Content: Yellow Labrador → {content_path}")
+print(f"  Style: Kandinsky Composition 7 → {style_path}")
 ```
 
 ### Cell 3: Create the Image Loading Function
@@ -230,29 +220,51 @@ plt.show()
 
 ### Cell 7: Try Multiple Styles
 
-```python
 # ============================================================
 # CELL 7: TRY DIFFERENT STYLES
-# What this cell does: Applies multiple painting styles to the same photo
+# What this cell does: Applies multiple painting styles to the same photo.
+# All style images are GENERATED offline -- no downloads needed!
 # ============================================================
 
-# Download additional style images.
+import numpy as np
+
+def generate_style_image(style_type, filename, size=256):
+    """
+    Generate a colourful abstract 'painting-like' image using numpy + matplotlib.
+    Works 100% offline -- no internet required.
+    The patterns mimic: swirling brush strokes, waves, and geometric abstraction.
+    """
+    x = np.linspace(-3, 3, size)
+    y = np.linspace(-3, 3, size)
+    X, Y = np.meshgrid(x, y)
+
+    if style_type == 'swirl':   # Van Gogh-like swirling strokes
+        Z = np.sin(5 * np.sqrt(X**2 + Y**2) - 2 * np.arctan2(Y, X)) + np.cos(3 * X * Y)
+        cmap = 'plasma'
+    elif style_type == 'wave':  # Hokusai-like waves
+        Z = np.sin(5 * X) * np.cos(3 * Y) + np.sin(X * Y)
+        cmap = 'Blues'
+    elif style_type == 'mosaic': # Kandinsky-like geometric abstraction
+        Z = np.sin(3 * X) * np.sin(3 * Y) + np.cos(5 * X + Y) + np.sin(X - 3 * Y)
+        cmap = 'RdYlBu'
+
+    fig, ax = plt.subplots(figsize=(size / 100, size / 100), dpi=100)
+    ax.contourf(X, Y, Z, levels=40, cmap=cmap)
+    ax.axis('off')
+    plt.tight_layout(pad=0)
+    plt.savefig(filename, bbox_inches='tight', pad_inches=0, dpi=100)
+    plt.close()
+    return filename
+
+# Generate 3 style images offline (runs in under 1 second each)
 styles = {
-    'Starry Night': style_path,
-    'The Great Wave': download_image(
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/'
-        'Tsunami_by_hokusai_19th_century.jpg/800px-Tsunami_by_hokusai_19th_century.jpg',
-        'wave.jpg'
-    ),
-    'Kandinsky': download_image(
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/'
-        'Vassily_Kandinsky%2C_1913_-_Composition_7.jpg/'
-        '800px-Vassily_Kandinsky%2C_1913_-_Composition_7.jpg',
-        'kandinsky.jpg'
-    )
+    'Kandinsky': style_path,   # real painting downloaded in Cell 2
+    'Van Gogh Swirl': generate_style_image('swirl',  'style_swirl.jpg'),
+    'Hokusai Wave':   generate_style_image('wave',   'style_wave.jpg'),
+    'Mosaic':         generate_style_image('mosaic', 'style_mosaic.jpg'),
 }
 
-fig, axes = plt.subplots(1, 4, figsize=(18, 5))
+fig, axes = plt.subplots(1, 5, figsize=(22, 5))
 
 # Show original.
 axes[0].imshow(content_image[0])
@@ -267,7 +279,7 @@ for idx, (name, path) in enumerate(styles.items()):
     axes[idx + 1].set_title(f"Style: {name}", fontsize=11)
     axes[idx + 1].axis('off')
 
-plt.suptitle("Same Photo, Different Styles", fontsize=14)
+plt.suptitle("Same Photo, Four Different Styles", fontsize=14)
 plt.tight_layout()
 plt.show()
 ```
@@ -478,6 +490,12 @@ Open the Hugging Face URL on your phone. Take a selfie and upload it directly. F
 
 ### Problem: Colors look wrong
 **Solution:** Make sure both images are RGB (color), not grayscale. The model expects 3-channel color images.
+
+### Problem: `Unknown image file format` error in Cell 3
+**Solution:** The downloaded file is not a real image. This happens when the download URL returned an HTML error page instead of an image (e.g., Wikimedia blocked the request). Cell 2 now uses TensorFlow's own Google Cloud Storage servers, which always return valid images. Do not change those URLs back to Wikimedia URLs — Wikimedia blocks automated downloads.
+
+### Problem: Cell 2 download fails with `HTTP Error 403`
+**Solution:** The Google Storage URLs in Cell 2 should work without any authentication. If Kaggle's internet is toggled **Off** in the sidebar, turn it **On** and re-run Cell 1 and Cell 2. The downloaded files are cached after the first run.
 
 ---
 
